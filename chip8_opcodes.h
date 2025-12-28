@@ -1,0 +1,46 @@
+#ifndef OPCODES_H
+#define OPCODES_H
+
+//每个函数的具体实现
+/*
+void oc_00e0(void);
+void oc_00ee(void);
+void oc_1nnn(void);
+void oc_2nnn(void);
+void oc_3xnn(void);
+void oc_4xnn(void);
+void oc_5xy0(void);
+void oc_6xnn(void);
+void oc_7xnn(void);
+void oc_8xy0(void);
+void oc_8xy1(void);
+void oc_8xy2(void);
+void oc_8xy3(void);
+void oc_8xy4(void);
+void oc_8xy5(void);
+void oc_8xy6(void);
+void oc_8xy7(void);
+void oc_8xye(void);
+void oc_9xy0(void);
+void oc_annn(void);
+void oc_bxnn(void);
+void oc_cxnn(void);
+void oc_dxyn(void);
+void oc_ex9e(void);
+void oc_exa1(void);
+void oc_fx07(void);
+void oc_fx0a(void);
+void oc_fx15(void);
+void oc_fx18(void);
+void oc_fx1e(void);
+void oc_fx29(void);
+void oc_fx33(void);
+void oc_fx55(void);
+void oc_fx65(void);
+
+*/
+void oc_null(void);
+//入口
+void oc_exec(void);
+
+#endif
