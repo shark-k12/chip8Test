@@ -13,3 +13,4 @@ All notable changes to this project will be documented in this file.
 
 香焕聪学习了如何查看changelog,md 文件
 
+李晟舒熟悉了基本框架，并配置好了代码环境
