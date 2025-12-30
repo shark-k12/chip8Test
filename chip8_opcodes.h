@@ -1,11 +1,13 @@
 #ifndef OPCODES_H
 #define OPCODES_H
 
-//每个函数的具体实现
-/*
+
 void oc_00e0(void);
 void oc_00ee(void);
 void oc_1nnn(void);
+//每个函数的具体实现
+/*
+
 void oc_2nnn(void);
 void oc_3xnn(void);
 void oc_4xnn(void);

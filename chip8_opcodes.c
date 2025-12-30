@@ -17,6 +17,20 @@ void oc_exec(void)
     }
 }
 
+void oc_00e0(void){
+    memset(CHIP8_CPU->video, 0, sizeof(CHIP8_CPU->video));
+}
+
+void oc_00ee(void){
+    CHIP8_CPU->sp--;
+    CHIP8_CPU->pc = CHIP8_CPU->stack[CHIP8_CPU->sp];
+}
+
+void oc_1nnn(void){
+    uint16_t address = CHIP8_CPU->opcode & 0x0fff;
+    CHIP8_CPU->pc = address;
+}
+
 void oc_null(void) 
 {
     printf("[STATE][OPCODE] Unknown :(\n");
