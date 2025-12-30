@@ -1,11 +1,13 @@
 #ifndef CHIP8_CPU_H_ 
 #define CHIP8_CPU_H_ 
+#define ROM_START_ADDR 0x200
+#define MEMORY_SIZE 4096
 
 #include <stdint.h>
 
 typedef struct {
     uint8_t registers[16];
-	uint8_t memory[4096];
+	uint8_t memory[MEMORY_SIZE];
 	uint16_t index;
 	uint16_t pc;
 	uint16_t stack[16];

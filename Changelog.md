@@ -10,7 +10,8 @@ All notable changes to this project will be documented in this file.
 ## \[v0.0.0] - 2025-12-29
 
 柯涵学习了基础的chip8知识,阅读了文档内容,了解了基础的git使用.
-
 香焕聪学习了如何查看changelog,md 文件
-
 李晟舒熟悉了基本框架，并配置好了代码环境
+
+## \[v0.0.1] - 2026-12-30
+柯涵实现了基础chip8指令集的加载,完成了init函数和loadrom函数.
