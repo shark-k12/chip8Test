@@ -17,3 +17,5 @@ All notable changes to this project will be documented in this file.
 柯涵实现了基础chip8指令集的加载,完成了init函数和loadrom函数.
 
 李晟舒实现了一些chip_opcodees里的函数。
+
+香焕聪在chip_8opcodes添加了2nnn,3xnn,4xnn三条指令。

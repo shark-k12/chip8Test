@@ -47,3 +47,33 @@ void oc_8xy4(void)
     CHIP8_CPU->registers[x] = (result & 0xff);
     CHIP8_CPU->pc += 2;     
 }
+
+// 2NNN - CALL addr: 调用子程序（地址NNN）
+void oc_2nnn(void) {
+    uint16_t address = CHIP8_CPU->opcode & 0x0FFF;
+    CHIP8_CPU->stack[CHIP8_CPU->sp] = CHIP8_CPU->pc;
+    CHIP8_CPU->sp++;
+    CHIP8_CPU->pc = address;
+}
+
+// 3XNN - SE Vx, byte: Vx==NN则跳过下一条指令
+void oc_3xnn(void) {
+    uint8_t x = (CHIP8_CPU->opcode & 0x0F00) >> 8;
+    uint8_t nn = CHIP8_CPU->opcode & 0x00FF;
+    if (CHIP8_CPU->registers[x] == nn) {
+        CHIP8_CPU->pc += 4;
+    } else {
+        CHIP8_CPU->pc += 2;
+    }
+}
+
+// 4XNN - SNE Vx, byte: Vx!=NN则跳过下一条指令
+void oc_4xnn(void) {
+    uint8_t x = (CHIP8_CPU->opcode & 0x0F00) >> 8;
+    uint8_t nn = CHIP8_CPU->opcode & 0x00FF;
+    if (CHIP8_CPU->registers[x] != nn) {
+        CHIP8_CPU->pc += 4;
+    } else {
+        CHIP8_CPU->pc += 2;
+    }
+}
