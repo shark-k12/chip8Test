@@ -19,7 +19,7 @@ void display_update(void); //刷新显示
 void display_destroy(void); //回收
 void audio_init(void); //声音初始化
 void audio_beep(void); //发出蜂鸣声
-void audio_destory(void); //回收 
+void audio_destroy(void); //回收 
 void input_detect(void); //检测输入
 
 extern char is_running;
