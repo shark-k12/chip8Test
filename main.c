@@ -6,25 +6,40 @@
 
 int main(int argc, char *argv[]) 
 {
-    //通过命令行参数加载ROM
+    if (argc < 2) 
+    {
+        fprintf(stderr, "用法: %s <rom文件路径>\n", argv[0]);
+        return 1;
+    }
 
-    //display init
-    //audio init
+    init();
 
-    //借助SDL_GetTicks控制while循环每秒执行次数
-    //AGAIN：CPU的定时器是60Hz，编程要注意
+    if (loadrom(argv[1]) != 0) 
+    {
+        destroy();
+        return 1;
+    }
+
+    display_init();
+    audio_init();
+
+    is_running = 1;
+
     while (is_running) 
     {
-        //input_detect()
-        //cycle()
+        input_detect();
+        cycle();
 
-        //如果要刷新 display_update()
-        //如果要发声 audio_beep()
+        display_update();
+
+        if (CHIP8_CPU->soundTimer > 0)
+        {
+            audio_beep();
+        }
     } 
 
-    //清理现场
-    //display_destroy
-    //audio_destroy
-    //destroy
+    display_destroy();
+    audio_destroy();
+    destroy();
     return 0;
 }
