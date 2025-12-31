@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
 #include <stdlib.h>
 #include "chip8_cpu.h"
 #include "chip8_opcodes.h"
