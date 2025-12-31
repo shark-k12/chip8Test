@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #include "chip8_cpu.h"
 #include "chip8_opcodes.h"
@@ -121,14 +122,17 @@ int loadrom(const char *rom)
 
 void cycle(void)  //模拟一个指令周期
 {
-    // Fetch指令，从pc处每次取两个字节到opcode中
+    CHIP8_CPU->opcode = CHIP8_CPU->memory[CHIP8_CPU->pc] << 8 | CHIP8_CPU->memory[CHIP8_CPU->pc + 1];
+    CHIP8_CPU->pc += 2;
+    oc_exec();
 
-	// Increment the PC before we execute anything,  pc += 2;
+    if (CHIP8_CPU->delayTimer > 0)
+    {
+        CHIP8_CPU->delayTimer--;
+    }
 
-	// Decode and Execute, 执行每条指令对应的行为, 调用oc_exec
-
-	// Decrement the delay timer if it's been set，此处需要考虑60Hz与CPU每秒执行多少条指令的关系
-
-	// Decrement the sound timer if it's been set，此处需要考虑60Hz与CPU每秒执行多少条指令的关系
- 
+    if (CHIP8_CPU->soundTimer > 0)
+    {
+        CHIP8_CPU->soundTimer--;
+    }
 }

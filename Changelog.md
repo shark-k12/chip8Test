@@ -8,17 +8,15 @@ All notable changes to this project will be documented in this file.
 * 格式：- 类型: 变更内容（版本/备注可选）
 
 ## \[v0.0.0] - 2025-12-29
-
 柯涵学习了基础的chip8知识,阅读了文档内容,了解了基础的git使用.
 香焕聪学习了如何查看changelog,md 文件
 李晟舒熟悉了基本框架，并配置好了代码环境
 
 ## \[v0.0.1] - 2026-12-30
 柯涵实现了基础chip8指令集的加载,完成了init函数和loadrom函数.
-
 李晟舒实现了一些chip_opcodees里的函数。
-
 香焕聪在chip_8opcodes添加了2nnn,3xnn,4xnn三条指令。
 
 ## \[v0.0.2] - 2026-12-31
 香焕聪 实现了5xy0,6xnn,7xnn,8xy0,8xy1,8xy2,8xy3,8xy4,8xy5,8xy6,8xy7,8xye,9xy0,annn,bxnn,cxnn,dxyn这16条指令。
+柯涵 完善了chip8_cpu.c的cycle函数功能,并在main.c中完善了输入检测和刷新显示的代码.
