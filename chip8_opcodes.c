@@ -144,7 +144,7 @@ void oc_8xy4(void)
 void oc_8xy5(void) {
     uint8_t x = (CHIP8_CPU->opcode & 0x0F00) >> 8;
     uint8_t y = (CHIP8_CPU->opcode & 0x00F0) >> 4;
-    if (CHIP8_CPU->registers[x] > CHIP8_CPU->registers[y]) {
+    if (CHIP8_CPU->registers[x] >= CHIP8_CPU->registers[y]) {
         CHIP8_CPU->registers[0xf] = 1;
     } else {
         CHIP8_CPU->registers[0xf] = 0;
@@ -166,7 +166,7 @@ void oc_8xy6(void) {
 void oc_8xy7(void) {
     uint8_t x = (CHIP8_CPU->opcode & 0x0F00) >> 8;
     uint8_t y = (CHIP8_CPU->opcode & 0x00F0) >> 4;
-    if (CHIP8_CPU->registers[y] > CHIP8_CPU->registers[x]) {
+    if (CHIP8_CPU->registers[y] >= CHIP8_CPU->registers[x]) {
         CHIP8_CPU->registers[0xf] = 1;
     } else {
         CHIP8_CPU->registers[0xf] = 0;
@@ -179,7 +179,7 @@ void oc_8xy7(void) {
 void oc_8xye(void) {
     uint8_t x = (CHIP8_CPU->opcode & 0x0F00) >> 8;
     uint8_t y = (CHIP8_CPU->opcode & 0x00F0) >> 4;
-    CHIP8_CPU->registers[0xf] = CHIP8_CPU->registers[x] & 0x80;
+    CHIP8_CPU->registers[0xf] = (CHIP8_CPU->registers[x] & 0x80) ? 1:0;
     CHIP8_CPU->registers[x] <<= 1;
     CHIP8_CPU->pc += 2;
 }
@@ -198,7 +198,7 @@ void oc_9xy0(void) {
 //ANNN - LD I, addr: I=NNN
 void oc_annn(void) {
     uint16_t nnn = CHIP8_CPU->opcode & 0x0FFF;
-    CHIP8_CPU->registers[0xf] = 0;
+    CHIP8_CPU->index = nnn;
     CHIP8_CPU->pc += 2;
 }
 
