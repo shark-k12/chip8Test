@@ -8,9 +8,6 @@ void oc_1nnn(void);
 void oc_2nnn(void);
 void oc_3xnn(void);
 void oc_4xnn(void);
-//每个函数的具体实现
-/*
-
 void oc_5xy0(void);
 void oc_6xnn(void);
 void oc_7xnn(void);
@@ -28,6 +25,9 @@ void oc_annn(void);
 void oc_bxnn(void);
 void oc_cxnn(void);
 void oc_dxyn(void);
+//每个函数的具体实现
+/*
+
 void oc_ex9e(void);
 void oc_exa1(void);
 void oc_fx07(void);

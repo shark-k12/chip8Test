@@ -19,3 +19,6 @@ All notable changes to this project will be documented in this file.
 李晟舒实现了一些chip_opcodees里的函数。
 
 香焕聪在chip_8opcodes添加了2nnn,3xnn,4xnn三条指令。
+
+## \[v0.0.2] - 2026-12-31
+香焕聪 实现了5xy0,6xnn,7xnn,8xy0,8xy1,8xy2,8xy3,8xy4,8xy5,8xy6,8xy7,8xye,9xy0,annn,bxnn,cxnn,dxyn这16条指令。
