@@ -19,5 +19,5 @@ All notable changes to this project will be documented in this file.
 
 ## \[v0.0.2] - 2026-12-31
 香焕聪 实现了5xy0,6xnn,7xnn,8xy0,8xy1,8xy2,8xy3,8xy4,8xy5,8xy6,8xy7,8xye,9xy0,annn,bxnn,cxnn,dxyn这16条指令。
-李晟舒实现了chip_opcodees.h余下的11条指令。
+李晟舒实现了chip_opcodees.h中余下的11条指令。
 柯涵 完善了chip8_cpu.c的cycle函数功能,并在main.c中完善了输入检测和刷新显示的代码.
