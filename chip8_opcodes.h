@@ -37,7 +37,6 @@ void oc_fx33(void);
 void oc_fx55(void);
 void oc_fx65(void);
 
-*/
 void oc_null(void);
 //入口
 void oc_exec(void);
