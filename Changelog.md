@@ -23,3 +23,4 @@ All notable changes to this project will be documented in this file.
 
 ## \[v0.0.3] - 2026-01-01
 香焕聪 学习了rom加载的知识。
+柯涵 完善了剩余的指令代码,和oc_exec函数的功能。
