@@ -25,9 +25,6 @@ void oc_annn(void);
 void oc_bxnn(void);
 void oc_cxnn(void);
 void oc_dxyn(void);
-//每个函数的具体实现
-/*
-
 void oc_ex9e(void);
 void oc_exa1(void);
 void oc_fx07(void);
@@ -39,8 +36,6 @@ void oc_fx29(void);
 void oc_fx33(void);
 void oc_fx55(void);
 void oc_fx65(void);
-
-*/
 void oc_null(void);
 //入口
 void oc_exec(void);
