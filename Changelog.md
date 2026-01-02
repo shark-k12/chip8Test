@@ -29,3 +29,4 @@ All notable changes to this project will be documented in this file.
 
 ## \[v0.0.4] - 2026-01-02
 香焕聪 没有进行进度推进。
+柯涵 rom加载出错没有进行进度推进。
