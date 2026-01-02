@@ -26,3 +26,6 @@ All notable changes to this project will be documented in this file.
 香焕聪 学习了rom加载的知识。
 柯涵 完善了剩余的指令代码,和oc_exec函数的功能。
 李晟舒完善了chip8_codes.h里剩余的11条指令。
+
+## \[v0.0.4] - 2026-01-02
+香焕聪 没有进行进度推进。
