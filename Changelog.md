@@ -31,3 +31,6 @@ All notable changes to this project will be documented in this file.
 香焕聪 没有进行进度推进。
 柯涵 rom加载出错没有进行进度推进。
 李晟舒没有进度推进。
+
+## \[v0.0.5] - 2026-01-03
+香焕聪 没有进行进度推进。
