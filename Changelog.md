@@ -36,3 +36,6 @@ All notable changes to this project will be documented in this file.
 香焕聪 没有进行进度推进。
 李晟舒 没有进行进度推进。
 柯涵 没有进行进度推进。
+
+## \[v0.0.6] - 2026-01-04
+香焕聪 没有进行进度推进。
