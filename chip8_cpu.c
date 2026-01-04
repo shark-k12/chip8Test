@@ -1,138 +1,94 @@
-#include <stdlib.h>
+#include "chip8_cpu.h"
 #include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "chip8_cpu.h"
-#include "chip8_opcodes.h"
+chip8_cpu_t *CHIP8_CPU = NULL;
 
-static const unsigned char FONTSET[80] = 
+int loadrom(const char *rom)
 {
-    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-    0x20, 0x60, 0x20, 0x20, 0x70, // 1
-    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-};
-
-chip8_cpu_t * CHIP8_CPU = NULL;
-
-void init(void) 
-{
-    //有实例，先销毁
-    if (CHIP8_CPU != NULL) 
+    FILE *fp = fopen(rom, "rb");
+    if (!fp)
     {
-        destroy();
+        fprintf(stderr, "无法打开ROM文件: %s\n", rom);
+        return -1;
     }
 
-    //分配内存
-    CHIP8_CPU = malloc(sizeof(chip8_cpu_t));
-    if (CHIP8_CPU == NULL) 
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    if (size > MEMORY_SIZE - ROM_START_ADDR)
     {
-        printf("Chip8初始化失败:无法分配CPU内存\n");
-        return;
+        fprintf(stderr, "ROM文件太大: %ld 字节\n", size);
+        fclose(fp);
+        return -1;
+    }
+
+    fread(CHIP8_CPU->memory + ROM_START_ADDR, 1, size, fp);
+    fclose(fp);
+
+    printf("ROM加载成功: %s (%ld字节) 加载到0x%04X\n", rom, size, ROM_START_ADDR);
+    return 0;
+}
+
+void init(void)
+{
+    CHIP8_CPU = (chip8_cpu_t *)malloc(sizeof(chip8_cpu_t));
+    if (!CHIP8_CPU)
+    {
+        fprintf(stderr, "内存分配失败\n");
+        exit(1);
     }
 
     memset(CHIP8_CPU, 0, sizeof(chip8_cpu_t));
 
-    // 加载字体集到内存中, 从0x000开始到0x04F结束
-    for (size_t i = 0; i < 80; i++)
-    {
-        CHIP8_CPU->memory[i] = FONTSET[i];
-    }
-
-    // 设置PC为ROM_START_ADDR,从0x200开始
     CHIP8_CPU->pc = ROM_START_ADDR;
     CHIP8_CPU->sp = 0;
     CHIP8_CPU->index = 0;
+    CHIP8_CPU->opcode = 0;
 
-    fprintf(stdout, "Chip8初始化成功:PC=0x%04X, SP=0x%02X, Index=0x%04X\n", CHIP8_CPU->pc, CHIP8_CPU->sp, CHIP8_CPU->index);    
+    uint8_t fontset[80] = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    };
+
+    for (int i = 0; i < 80; i++)
+    {
+        CHIP8_CPU->memory[i] = fontset[i];
+    }
+
+    printf("Chip8初始化成功 PC=0x%04X, SP=0x%02X, Index=0x%04X\n",
+           CHIP8_CPU->pc, CHIP8_CPU->sp, CHIP8_CPU->index);
 }
 
-void destroy(void) 
+void destroy(void)
 {
-    free(CHIP8_CPU);
-    CHIP8_CPU = NULL;
+    if (CHIP8_CPU)
+    {
+        free(CHIP8_CPU);
+        CHIP8_CPU = NULL;
+    }
 }
 
-int loadrom(const char *rom) 
+void cycle(void)
 {
-    FILE *file = NULL;
-    long file_size = 0;
-    size_t bytes_read = 0;
+    CHIP8_CPU->opcode = (CHIP8_CPU->memory[CHIP8_CPU->pc] << 8) | CHIP8_CPU->memory[CHIP8_CPU->pc + 1];
 
-    if (CHIP8_CPU == NULL) 
-    {
-        fprintf(stderr, "加载ROM失败: CPU未初始化\n");
-        return -1;
-    }
-
-    if (rom == NULL) 
-    {
-        fprintf(stderr, "加载ROM失败: 文件路径为空\n");
-        return -1;
-    }
-
-    file = fopen(rom, "rb");
-    if (file == NULL) 
-    {
-        fprintf(stderr, "加载ROM失败: 无法打开文件 %s\n", rom);
-        return -1;
-    }
-
-    fseek(file, 0, SEEK_END);
-    file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    if (file_size > (MEMORY_SIZE - ROM_START_ADDR)) 
-    {
-        fprintf(stderr, "加载ROM失败: ROM文件过大 (%ld字节), 超过可用内存 (%d字节)\n", 
-                file_size, MEMORY_SIZE - ROM_START_ADDR);
-        fclose(file);
-        return -1;
-    }
-
-    bytes_read = fread(CHIP8_CPU->memory + ROM_START_ADDR, 1, file_size, file);
-    if (bytes_read != (size_t)file_size) 
-    {
-        fprintf(stderr, "加载ROM失败: 读取文件错误 (期望%ld字节, 实际读取%zu字节)\n", 
-                file_size, bytes_read);
-        fclose(file);
-        return -1;
-    }
-
-    fclose(file);
-
-    CHIP8_CPU->pc = ROM_START_ADDR;
-
-    fprintf(stdout, "ROM加载成功: %s (%ld字节) 加载到 0x%04X\n", rom, file_size, ROM_START_ADDR);
-    return 0;
-}
-
-void cycle(void)  //模拟一个指令周期
-{
-    CHIP8_CPU->opcode = CHIP8_CPU->memory[CHIP8_CPU->pc] << 8 | CHIP8_CPU->memory[CHIP8_CPU->pc + 1];
-    CHIP8_CPU->pc += 2;
+    extern void oc_exec(void);
     oc_exec();
-
-    if (CHIP8_CPU->delayTimer > 0)
-    {
-        CHIP8_CPU->delayTimer--;
-    }
-
-    if (CHIP8_CPU->soundTimer > 0)
-    {
-        CHIP8_CPU->soundTimer--;
-    }
 }

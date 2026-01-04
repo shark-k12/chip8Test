@@ -2,6 +2,7 @@
 #define OPCODES_H
 
 
+void oc_0000(void);
 void oc_00e0(void);
 void oc_00ee(void);
 void oc_1nnn(void);

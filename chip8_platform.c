@@ -1,183 +1,190 @@
 #include <SDL2/SDL.h>
-
-#include <math.h>
-#ifndef M_PI
-    # define M_PI 3.14159265358979323846
-#endif
 #include <stdio.h>
-#include "chip8_cpu.h"
+#include <stdlib.h>
 #include "chip8_platform.h"
+#include "chip8_cpu.h"
 
-static SDL_Window *win = NULL;
-static SDL_Renderer *rdr = NULL;
-static SDL_Texture *txr = NULL;
+static SDL_Window *window = NULL;
+static SDL_Renderer *renderer = NULL;
+static SDL_Texture *texture = NULL;
+static SDL_AudioDeviceID audio_device = 0;
 
-SDL_AudioSpec want;
-static SDL_AudioDeviceID dev;
-unsigned int sampleNR = 0;
-
-static const SDL_KeyCode key_map[KEY_SZ] =
-{
-    SDLK_x, SDLK_1, SDLK_2,
-    SDLK_3, SDLK_q, SDLK_w,
-    SDLK_e, SDLK_a, SDLK_s,
-    SDLK_d, SDLK_z, SDLK_c,
-    SDLK_4, SDLK_r, SDLK_f,
-    SDLK_v
+static SDL_Keycode keymap[KEY_SZ] = {
+    SDLK_1, SDLK_2, SDLK_3, SDLK_4,
+    SDLK_q, SDLK_w, SDLK_e, SDLK_r,
+    SDLK_a, SDLK_s, SDLK_d, SDLK_f,
+    SDLK_z, SDLK_x, SDLK_c, SDLK_v
 };
 
-char is_running = 0;
+char is_running = 1;
 
 void display_init(void)
 {
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
-    {
-        printf("[SDL INIT STATUS] %s\n", SDL_GetError());
-        return;
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        fprintf(stderr, "SDL初始化失败: %s\n", SDL_GetError());
+        exit(1);
     }
 
-    win = SDL_CreateWindow(
-        "CHIP-WALO",
+    window = SDL_CreateWindow(
+        "CHIP-8 Emulator",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        (SCR_W * SCALE),
-        (SCR_H * SCALE),
-        SDL_WINDOW_SHOWN);
+        SCR_W * SCALE,
+        SCR_H * SCALE,
+        SDL_WINDOW_SHOWN
+    );
 
-    if (win == NULL) 
-    {
-        printf("[WINDOW STATUS] %s\n", SDL_GetError());
-        return;
+    if (!window) {
+        fprintf(stderr, "窗口创建失败: %s\n", SDL_GetError());
+        exit(1);
     }
 
-    rdr = SDL_CreateRenderer( win, -1, 0);
-
-    if (rdr == NULL) 
-    {
-        printf("[RENDERER STATUS] %s\n", SDL_GetError());
-        return;
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        fprintf(stderr, "渲染器创建失败: %s\n", SDL_GetError());
+        exit(1);
     }
 
-    txr = SDL_CreateTexture(
-        rdr,
+    // 显式设置渲染器默认颜色为纯黑色（RGBA：0,0,0,255）
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+    texture = SDL_CreateTexture(
+        renderer,
         SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_STREAMING, 
+        SDL_TEXTUREACCESS_STREAMING,
         SCR_W,
-        SCR_H);
-    
-    if (txr == NULL) 
-    {
-        printf("[TEXTURE STATUS] %s\n", SDL_GetError());
-        return;
-    }
+        SCR_H
+    );
 
-    printf("[STATE] Graphics Initialized.\n");
+    if (!texture) {
+        fprintf(stderr, "纹理创建失败: %s\n", SDL_GetError());
+        exit(1);
+    }
 }
 
+// chip8_platform.c 的 display_update 函数
 void display_update(void)
 {
-    static int px_buf[SCR_SZ] = { 0 };
-    static const SDL_Rect fill = { 0, 0, (SCR_W * SCALE), (SCR_H * SCALE) };
-    static const unsigned char R = BG_COLOR >> 24;
-    static const unsigned char G = (BG_COLOR >> 16) & 0xff;
-    static const unsigned char B = (BG_COLOR >> 8) & 0xff;
-    static const unsigned char A = BG_COLOR & 0xff;
+    void *pixels;
+    int pitch;
 
-    for (int px = 0; px < SCR_SZ; px++)
-    {
-        px_buf[px] = ((FG_COLOR * CHIP8_CPU->video[px]) | BG_COLOR);
+    SDL_LockTexture(texture, NULL, &pixels, &pitch);
+
+    Uint32 *pixel_data = (Uint32 *)pixels;
+    // 强制背景为黑色，前景为白色
+    for (int i = 0; i < SCR_SZ; i++) {
+        pixel_data[i] = CHIP8_CPU->video[i] ? FG_COLOR : 0xFF000000; // 直接写死黑色，避免宏定义问题
     }
 
-    SDL_UpdateTexture(txr, NULL, px_buf, SCR_W * sizeof(*px_buf));
-    SDL_SetRenderDrawColor(rdr, R, G, B, A);
-    SDL_RenderFillRect(rdr, &fill);
-    SDL_RenderCopy(rdr, txr, NULL, NULL);
-    SDL_RenderPresent(rdr);
+    SDL_UnlockTexture(texture);
+
+    // 清屏用黑色
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
 }
 
 void display_destroy(void)
 {
-    SDL_DestroyTexture(txr);
-    SDL_DestroyRenderer(rdr);
-    SDL_DestroyWindow(win);
-    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+    if (texture) {
+        SDL_DestroyTexture(texture);
+        texture = NULL;
+    }
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = NULL;
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = NULL;
+    }
     SDL_Quit();
-    printf("[STATE] Graphics Deinitialized.\n");
 }
 
-static void audio_cb(void *userdata, unsigned short *raw_buf, int bytes)
+static void audio_callback(void *userdata, Uint8 *stream, int len)
 {
-    unsigned int len = (unsigned int)(bytes / 2);
-    unsigned long long start_sample = (unsigned long long)userdata;
-    double sample_timestep = 1.0f / AUDIO_SAMPLING_RATE;
-    unsigned long long current_time = start_sample / AUDIO_SAMPLING_RATE;
+    static int phase = 0;
+    Sint16 *buffer = (Sint16 *)stream;
+    int samples = len / 2;
+    // 调整为440Hz方波（标准CHIP-8蜂鸣频率）
+    int freq = 440;
+    int period = AUDIO_SAMPLING_RATE / freq;
 
-    for (unsigned int w = 0; w < len; w++)
-    {
-        raw_buf[w] = (unsigned short)(AUDIO_AMPLITUDE * sin(2.0f * M_PI * 441.0f * current_time));
-        current_time += (unsigned long long)sample_timestep;
+    for (int i = 0; i < samples; i++) {
+        buffer[i] = (Sint16)(AUDIO_AMPLITUDE * ((phase / period) % 2 ? 1 : -1));
+        phase++;
     }
-
-    *(unsigned int *)userdata += len;
 }
 
 void audio_init(void)
 {
-    want.freq = AUDIO_SAMPLING_RATE;
-    want.format = AUDIO_S16SYS;
-    want.channels = 1;
-    want.samples = 2048;
-    want.callback = (SDL_AudioCallback)audio_cb;
-    want.userdata = &sampleNR;
-
-    dev = SDL_OpenAudioDevice(NULL, 0, &want, NULL, 0);
-    if (dev == 0)
-    {
-        printf("[STATUS] %s\n", SDL_GetError());
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        fprintf(stderr, "SDL音频初始化失败: %s\n", SDL_GetError());
         return;
     }
 
-    printf("[STATE] Audio Initialized.\n");
+    SDL_AudioSpec spec;
+    SDL_zero(spec);
+    spec.freq = AUDIO_SAMPLING_RATE;
+    spec.format = AUDIO_S16SYS;
+    spec.channels = 1;
+    spec.samples = 512;
+    spec.callback = audio_callback;
+
+    audio_device = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    if (audio_device == 0) {
+        fprintf(stderr, "音频设备打开失败: %s\n", SDL_GetError());
+    }
 }
 
-void audio_beep(void) 
+void audio_beep(void)
 {
-    SDL_PauseAudioDevice(dev, 0);
-    SDL_Delay(48);
-    SDL_PauseAudioDevice(dev, 1);
+    if (audio_device != 0) {
+        SDL_PauseAudioDevice(audio_device, 0);
+    }
 }
 
-void audio_destroy(void) 
+void audio_stop(void)
 {
-    SDL_CloseAudioDevice(dev);
-    printf("[STATE] Audio Deinitialized.\n");
+    if (audio_device != 0) {
+        SDL_PauseAudioDevice(audio_device, 1);
+    }
 }
 
-void input_detect(void) 
+void audio_destroy(void)
 {
-    SDL_PumpEvents();
-    const unsigned char *keyStates = SDL_GetKeyboardState(NULL);
+    if (audio_device != 0) {
+        SDL_CloseAudioDevice(audio_device);
+        audio_device = 0;
+    }
+}
 
-    SDL_Event e;
-    if (SDL_PollEvent(&e))
-    {
-        switch (e.type)
-        {
-            case SDL_QUIT:
-                is_running = 0;
-                break;
+void input_detect(void)
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            is_running = 0;
         }
-    }
+        else if (event.type == SDL_KEYDOWN) {
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
+                is_running = 0;
+            }
 
-    if (keyStates[SDL_SCANCODE_ESCAPE] || keyStates[SDL_SCANCODE_AC_BACK])
-    {
-        is_running = 0;
-    }
-
-    for (unsigned char key = 0; key < KEY_SZ; key++) 
-    {
-        SDL_Keycode mapped_key = key_map[key];
-        if (keyStates[SDL_GetScancodeFromKey(mapped_key)]) { CHIP8_CPU->keypad[key] = 1; }
-        else { CHIP8_CPU->keypad[key] = 0; }
+            for (int i = 0; i < KEY_SZ; i++) {
+                if (event.key.keysym.sym == keymap[i]) {
+                    CHIP8_CPU->keypad[i] = 1;
+                }
+            }
+        }
+        else if (event.type == SDL_KEYUP) {
+            for (int i = 0; i < KEY_SZ; i++) {
+                if (event.key.keysym.sym == keymap[i]) {
+                    CHIP8_CPU->keypad[i] = 0;
+                }
+            }
+        }
     }
 }
