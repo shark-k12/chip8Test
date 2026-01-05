@@ -41,3 +41,6 @@ All notable changes to this project will be documented in this file.
 香焕聪 解决了rom加载出错的问题。
 李晟舒 没有进行进度推进。
 柯涵 上傳了另一個版本,但是加載pong.ch8時,蜂鳴器可以正常運行,但是分數不會實時刷新
+
+## \[v0.0.6] - 2026-01-05
+李晟舒 初步完成了游戏自定义速度调控。
