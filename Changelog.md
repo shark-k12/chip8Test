@@ -45,3 +45,4 @@ All notable changes to this project will be documented in this file.
 ## \[v0.0.6] - 2026-01-05
 李晟舒 初步完成了游戏自定义速度调控。
 柯涵,分数还是没有正常显示,应该是指令执行的问题
+香焕聪 创建新分支，是经过ai修改的代码，能正常加载rom，暂时未找出先前版本的错误。
