@@ -4,8 +4,9 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "E:\\SDL2-devel-2.32.8-mingw\\SDL2-2.32.8\\x86_64-w64-mingw32\\include",
-                "E:\\SDL2_ttf-2.24.0\\x86_64-w64-mingw32\\include"
+                "E:\\SDL2-2.32.8\\x86_64-w64-mingw32\\include",
+                "E:\\SDL2_ttf-2.24.0\\x86_64-w64-mingw32\\include",
+                "E:\\SDL2-2.32.8\\x86_64-w64-mingw32\\include\\SDL2"
             ],
             "defines": [
                 "_DEBUG",
@@ -15,7 +16,7 @@
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "windows-gcc-x64",
-            "compilerPath": "E:/minGW/mingw64/bin/gcc.exe"
+            "compilerPath": "E:\\mingw64\\bin\\gcc.exe"
         }
     ],
     "version": 4
