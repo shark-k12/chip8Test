@@ -2,6 +2,9 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <windows.h>
+#include <SDL2/SDL_ttf.h>
+
+extern int speed_percent;
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -12,6 +15,10 @@ static const int SCREEN_SCALE = 10;
 static const int WINDOW_WIDTH = SCREEN_WIDTH * SCREEN_SCALE;
 static const int WINDOW_HEIGHT = SCREEN_HEIGHT * SCREEN_SCALE;
 
+// 添加字体相关静态变量
+static SDL_Texture* speed_texture = NULL;
+static TTF_Font* font = NULL;
+
 static const uint8_t keymap[KEY_COUNT] = {
     SDLK_0, SDLK_1, SDLK_2, SDLK_3,
     SDLK_4, SDLK_5, SDLK_6, SDLK_7,
@@ -20,11 +27,14 @@ static const uint8_t keymap[KEY_COUNT] = {
 };
 
 void platform_init(void) {
+    printf("Initializing SDL...\n");
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         printf("SDL initialization failed: %s\n", SDL_GetError());
         exit(1);
     }
+    printf("SDL initialized successfully.\n");
     
+    printf("Creating window...\n");
     window = SDL_CreateWindow(
         "CHIP-8 Emulator",
         SDL_WINDOWPOS_CENTERED,
@@ -42,6 +52,7 @@ void platform_init(void) {
         SDL_Quit();
         exit(1);
     }
+    printf("Window created successfully.\n");
     
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
@@ -66,6 +77,19 @@ void platform_init(void) {
         SDL_Quit();
         exit(1);
     }
+                                                     // 初始化TTF库
+    if (TTF_Init() == -1) {
+        printf("TTF initialization failed: %s\n", TTF_GetError());
+        exit(1);
+    }else {
+        // 加载字体，设置字体大小为16
+        font = TTF_OpenFont("arial.ttf", 16);
+        if (!font) {
+            printf("Failed to load font: %s\n", TTF_GetError());
+            exit(1);
+        }
+    }
+    
 }
 
 void platform_cleanup(void) {
@@ -79,6 +103,45 @@ void platform_cleanup(void) {
         SDL_DestroyWindow(window);
     }
     SDL_Quit();
+                                              // 清理TTF资源
+    if (speed_texture) {
+        SDL_DestroyTexture(speed_texture);
+    }
+    if (font) {
+        TTF_CloseFont(font);
+    }
+    TTF_Quit();
+}
+
+// 速度显示函数实现
+void platform_draw_speed(const char* text){
+    if (!font || !text) return;
+    
+    // 创建文字表面
+    SDL_Color color = {255, 255, 255, 255};  // 白色文字
+    SDL_Surface* surface = TTF_RenderText_Solid(font, text, color);
+    if (!surface) {
+        printf("Failed to create text surface: %s\n", TTF_GetError());
+        return;
+    }
+    
+    // 创建纹理
+    if (speed_texture) {
+        SDL_DestroyTexture(speed_texture);
+    }
+    speed_texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    
+    if (!speed_texture) {
+        printf("Failed to create text texture: %s\n", SDL_GetError());
+        return;
+    }
+    
+    // 绘制到窗口左上角
+    SDL_Rect dest_rect = {10, 10, 0, 0};
+    SDL_QueryTexture(speed_texture, NULL, NULL, &dest_rect.w, &dest_rect.h);
+    SDL_RenderCopy(renderer, speed_texture, NULL, &dest_rect);
+    SDL_RenderPresent(renderer);
 }
 
 void platform_draw(const Chip8* cpu) {
@@ -113,6 +176,13 @@ int platform_handle_input(Chip8* cpu) {
             }
             if (event.key.keysym.sym == SDLK_ESCAPE) {
                 quit_flag = 1;
+            }
+            // 速度调节
+            if (event.key.keysym.sym == SDLK_EQUALS && (event.key.keysym.mod & KMOD_LSHIFT)) {
+                if (speed_percent < 200) speed_percent += 10;
+            }
+            if (event.key.keysym.sym == SDLK_MINUS) {
+                if (speed_percent > 50) speed_percent -= 10;
             }
         }
         
