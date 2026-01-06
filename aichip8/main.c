@@ -11,32 +11,42 @@
 #define FRAME_DELAY (1000 / FRAME_RATE)
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        printf("Usage: %s <rom_file>\n", argv[0]);
-        return 1;
-    }
-    
     Chip8 cpu;
     chip8_init(&cpu);
-    chip8_load_rom(&cpu, argv[1]);
+    int rom_loaded = 0;
     
     platform_init();
     
-    printf("Starting CHIP-8 emulation...\n");
+    if (argc == 2) {
+        chip8_load_rom(&cpu, argv[1]);
+        rom_loaded = 1;
+        printf("Starting CHIP-8 emulation with %s...\n", argv[1]);
+    } else {
+        printf("CHIP-8 Emulator started.\n");
+        printf("Drag and drop a ROM file into the window to load.\n");
+    }
+    
     printf("Press ESC to quit\n");
     
     while (!platform_should_quit()) {
         clock_t start_time = clock();
         
-        for (int i = 0; i < CYCLES_PER_FRAME; i++) {
-            chip8_cycle(&cpu);
+        if (rom_loaded) {
+            for (int i = 0; i < CYCLES_PER_FRAME; i++) {
+                chip8_cycle(&cpu);
+            }
+            
+            chip8_decrement_timers(&cpu);
         }
         
-        chip8_decrement_timers(&cpu);
+        // Handle input and check for dropped files
+        if (platform_handle_input(&cpu)) {
+            // A ROM was dropped and loaded successfully
+            rom_loaded = 1;
+            printf("Starting CHIP-8 emulation...\n");
+        }
         
-        platform_handle_input(&cpu);
-        
-        if (cpu.draw_flag) {
+        if (rom_loaded && cpu.draw_flag) {
             platform_draw(&cpu);
             cpu.draw_flag = false;
         }

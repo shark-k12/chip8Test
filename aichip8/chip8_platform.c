@@ -31,8 +31,11 @@ void platform_init(void) {
         SDL_WINDOWPOS_CENTERED,
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
-        SDL_WINDOW_SHOWN
+        SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI
     );
+    
+    // Enable file dropping
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
     
     if (!window) {
         printf("Window creation failed: %s\n", SDL_GetError());
@@ -93,8 +96,9 @@ void platform_draw(const Chip8* cpu) {
     SDL_RenderPresent(renderer);
 }
 
-void platform_handle_input(Chip8* cpu) {
+int platform_handle_input(Chip8* cpu) {
     SDL_Event event;
+    int rom_dropped = 0;
     
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
@@ -107,6 +111,9 @@ void platform_handle_input(Chip8* cpu) {
                     cpu->keypad[i] = 1;
                 }
             }
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
+                quit_flag = 1;
+            }
         }
         
         if (event.type == SDL_KEYUP) {
@@ -116,7 +123,22 @@ void platform_handle_input(Chip8* cpu) {
                 }
             }
         }
+        
+        if (event.type == SDL_DROPFILE) {
+            char* file_path = event.drop.file;
+            printf("Loading ROM: %s\n", file_path);
+            
+            // Load the ROM into the CPU
+            chip8_load_rom(cpu, file_path);
+            
+            // Free the file path allocated by SDL
+            SDL_free(file_path);
+            
+            rom_dropped = 1;
+        }
     }
+    
+    return rom_dropped;
 }
 
 void platform_beep(void) {
