@@ -55,3 +55,4 @@ All notable changes to this project will be documented in this file.
 ## \[v0.0.9] - 2026-01-07
 柯涵 尝试了加载新的rom游戏。
 香焕聪 检查代码，暂时未发现错误。
+李晟舒 进行了调试，运行Pong.ch8功能正常。
