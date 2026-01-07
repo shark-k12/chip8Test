@@ -53,4 +53,5 @@ All notable changes to this project will be documented in this file.
 香焕聪 完善了按键可视化功能，修改了速度调节逻辑。
 
 ## \[v0.0.9] - 2026-01-07
-柯涵 尝试了加载新的rom游戏
+柯涵 尝试了加载新的rom游戏。
+香焕聪 检查代码，暂时未发现错误。
