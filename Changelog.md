@@ -51,3 +51,6 @@ All notable changes to this project will be documented in this file.
 李晟舒 经过大数据模型辅助已经实现游戏速度自定义调控功能。
 柯涵   实现了rom的拖放功能,按键可视化。
 香焕聪 完善了按键可视化功能，修改了速度调节逻辑。
+
+## \[v0.0.9] - 2026-01-07
+柯涵 尝试了加载新的rom游戏
